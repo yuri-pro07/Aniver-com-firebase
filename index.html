@@ -767,45 +767,35 @@
             }
         }
 
+        // Preparar áudio para iOS
+        music.load();
+        
         // Audio control function
         window.toggleAudio = function() {
             if (playing) {
                 music.pause();
-                music.currentTime = 0;
                 audioBtn.textContent = '🎵';
                 playing = false;
             } else {
-                const playPromise = music.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        audioBtn.textContent = '🔊';
-                        playing = true;
-                    }).catch(error => {
-                        console.error('Audio playback failed:', error);
-                        audioBtn.textContent = '🎵';
-                        alert('Toque novamente para ativar a música! 🎵');
-                    });
-                }
+                // Para iOS, precisamos fazer play() diretamente no evento de clique
+                music.play().then(() => {
+                    audioBtn.textContent = '🔊';
+                    playing = true;
+                }).catch(error => {
+                    console.error('Audio playback failed:', error);
+                    audioBtn.textContent = '🎵';
+                    
+                    // Tentar recarregar o áudio
+                    music.load();
+                    
+                    // Mostrar mensagem amigável
+                    alert('🎵 Toque no botão de música novamente para ativar o som!');
+                });
             }
         }
 
         // Initialize audio button state
         audioBtn.textContent = '🎵';
-
-        // Attempt to play audio only after user interaction
-        document.addEventListener('click', () => {
-            if (!playing) {
-                const playPromise = music.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        audioBtn.textContent = '🔊';
-                        playing = true;
-                    }).catch(() => {
-                        audioBtn.textContent = '🎵';
-                    });
-                }
-            }
-        }, { once: true });
 
         // Efeito de olhos seguindo o cursor
         document.addEventListener('mousemove', (e) => {
